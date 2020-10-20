@@ -12,7 +12,7 @@ module.exports = {
     // 使用 prettier 的样式规范且 ESLint 检测出的格式问题输出 error 或 warning
     'plugin:prettier/recommended'
   ],
-  plugins: ['@typescript-eslint'],
+  plugins: ['html', '@typescript-eslint', 'import', 'react-hooks'],
   parserOptions: {
     ecmaVersion: 2020,
     ecmaFeatures: {
@@ -51,6 +51,12 @@ module.exports = {
     '@typescript-eslint/ban-ts-comment': OFF
   },
   overrides: [
+    {
+      files: ['*.js', '*.jsx'],
+      rules: {
+        '@typescript-eslint/no-require-imports': 0
+      }
+    },
     {
       files: ['**/*.d.ts'],
       rules: {
