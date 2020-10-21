@@ -1,3 +1,5 @@
+'use strict'
+
 module.exports = {
   // 一行最多 80 字符
   printWidth: 80,

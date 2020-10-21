@@ -1,3 +1,5 @@
+'use strict'
+
 module.exports = {
   hooks: {
     'prepare-commit-msg': 'devmoji -e --lint',

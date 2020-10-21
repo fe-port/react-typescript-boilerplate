@@ -1,3 +1,5 @@
+'use strict'
+
 module.exports = {
   extends: [
     'stylelint-config-standard',
@@ -26,6 +28,13 @@ module.exports = {
     'unit-no-unknown': [true, { ignoreUnits: ['rpx'] }]
   },
   ignoreFiles: [
+    '.eslintrc.js',
+    '.huskyrc.js',
+    '.lintstagedrc.js',
+    '.prettierrc.js',
+    '.stylelintrc.js',
+    'babel.config.js',
+    '*.md',
     '**/*.js',
     '**/*.jsx',
     '**/*.tsx',

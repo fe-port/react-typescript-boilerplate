@@ -6,6 +6,9 @@ import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
 import commonConfig from './webpack.common'
 import { PROJECT_ROOT } from '../../config/constants'
 
+/**
+ * webpack 开发环境配置
+ */
 const webpackConfig = merge(commonConfig, {
   mode: 'development',
   // 如果觉得还可以容忍更慢的非 eval 类型的 sourceMap，可以搭配 error-overlay-webpack-plugin 使用
@@ -44,6 +47,9 @@ const webpackConfig = merge(commonConfig, {
         }
       }
     }
+  },
+  performance: {
+    hints: 'error'
   }
 })
 

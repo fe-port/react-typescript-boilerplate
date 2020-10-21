@@ -10,6 +10,9 @@ import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin'
 import commonConfig from './webpack.common'
 import { COPYRIGHT, PROJECT_ROOT } from '../../config/constants'
 
+/**
+ * webpack 生产环境配置
+ */
 const webpackConfig = merge(commonConfig, {
   mode: 'production',
   devtool: 'cheap-module-source-map',
@@ -78,7 +81,7 @@ const webpackConfig = merge(commonConfig, {
     },
     minimize: true,
     minimizer: [
-      // new TerserPlugin({ extractComments: false }),
+      // new TerserPlugin({ extractComments: false })
       // new OptimizeCSSAssetsPlugin()
     ]
   }

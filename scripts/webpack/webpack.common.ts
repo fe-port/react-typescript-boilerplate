@@ -5,14 +5,11 @@ import WebpackBar from 'webpackbar'
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 import CopyPlugin from 'copy-webpack-plugin'
 import FriendlyErrorsPlugin from 'friendly-errors-webpack-plugin'
-import { Options as HtmlMinifierOptions } from 'html-minifier'
-// import AntdDayjsWebpackPlugin from 'antd-dayjs-webpack-plugin'
+// import { Options as HtmlMinifierOptions } from 'html-minifier'
+import AntdDayjsWebpackPlugin from 'antd-dayjs-webpack-plugin'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import { loader as MiniCssExtractLoader } from 'mini-css-extract-plugin'
-import SizePlugin from 'size-plugin'
-import SpeedMeasurePlugin from 'speed-measure-webpack-plugin'
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
-import { srcAlias } from '../utils'
+// import { srcAlias } from '../utils'
 import config from '../../config'
 import {
   __DEV__,
@@ -48,20 +45,23 @@ function getCSSLoaders(importLoaders: number) {
 }
 
 // index.html 压缩选项
-const htmlMinifyOptions: HtmlMinifierOptions = {
-  collapseWhitespace: true,
-  collapseBooleanAttributes: true,
-  collapseInlineTagWhitespace: true,
-  removeComments: true,
-  removeRedundantAttributes: true,
-  removeScriptTypeAttributes: true,
-  removeStyleLinkTypeAttributes: true,
-  minifyCSS: true,
-  minifyJS: true,
-  minifyURLs: true,
-  useShortDoctype: true
-}
+// const htmlMinifyOptions: HtmlMinifierOptions = {
+//   collapseWhitespace: true,
+//   collapseBooleanAttributes: true,
+//   collapseInlineTagWhitespace: true,
+//   removeComments: true,
+//   removeRedundantAttributes: true,
+//   removeScriptTypeAttributes: true,
+//   removeStyleLinkTypeAttributes: true,
+//   minifyCSS: true,
+//   minifyJS: true,
+//   minifyURLs: true,
+//   useShortDoctype: true
+// }
 
+/**
+ * webpack 基础配置
+ */
 const commonConfig: webpack.Configuration = {
   cache: true,
   context: PROJECT_ROOT,
@@ -77,7 +77,7 @@ const commonConfig: webpack.Configuration = {
     // 我们导入ts 等模块一般不写后缀名，webpack 会尝试使用这个数组提供的后缀名去导入
     extensions: ['.js', '.tsx', '.ts', '.json'],
     alias: {
-      ...srcAlias,
+      // ...srcAlias,
       // 替换 react-dom 成 @hot-loader/react-dom 以支持 react hooks 的 hot reload
       'react-dom': __DEV__ ? '@hot-loader/react-dom' : 'react-dom',
       '@': ENTRY_PATH
@@ -153,8 +153,8 @@ const commonConfig: webpack.Configuration = {
     ]
   },
   plugins: [
-    // [替换失败]用dayjs 替换 moment
-    // new AntdDayjsWebpackPlugin(),
+    // [替换失败]用 dayjs 替换 moment
+    new AntdDayjsWebpackPlugin(),
     new WebpackBar({
       name: 'React-TypeScript-Boilerplate',
       // react 蓝
@@ -167,9 +167,10 @@ const commonConfig: webpack.Configuration = {
     }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-      'process.env.antd': config.antd,
-      'process.env.rematch': config.rematch,
-      'process.env.Reatoron': config.Reactotron
+      'process.env.antd': JSON.stringify(config.antd),
+      'process.env.sentry': JSON.stringify(config.sentry),
+      'process.env.rematch': JSON.stringify(config.rematch),
+      'process.env.Reatoron': JSON.stringify(config.Reactotron)
     }),
     // new webpack.NamedModulesPlugin(),
     // new webpack.NoEmitOnErrorsPlugin(),
@@ -177,7 +178,7 @@ const commonConfig: webpack.Configuration = {
     new HtmlWebpackPlugin({
       // HtmlWebpackPlugin 会调用 HtmlMinifier 对 HTMl 文件进行压缩
       // 只在生产环境压缩
-      minify: __DEV__ ? false : htmlMinifyOptions,
+      // minify: __DEV__ ? false : htmlMinifyOptions,
       template: path.resolve(PUBLIC_PATH, './index.html'),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       templateParameters: (...args: any[]) => {
@@ -200,6 +201,7 @@ const commonConfig: webpack.Configuration = {
         }
       }
     }),
+    // 将 public 文件夹中除 index.html 以外的文件拷贝到构建输出文件夹中
     new CopyPlugin({
       patterns: [
         {
@@ -213,10 +215,7 @@ const commonConfig: webpack.Configuration = {
         }
       ]
     })
-  ],
-  performance: {
-    hints: false
-  }
+  ]
 }
 
 if (__DEV__) {
@@ -230,12 +229,15 @@ if (__DEV__) {
 let webpackConfig = commonConfig
 // 使用 --analyze 参数构建时，会输出各个阶段的耗时和自动打开浏览器访问 bundle 分析页面
 if (ENABLE_ANALYZE) {
+  const SizePlugin = require('size-plugin')
+  const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
   webpackConfig?.plugins.push(
     new SizePlugin({ writeFile: false }),
     new BundleAnalyzerPlugin()
   )
 }
 if (ENABLE_SPEED_MEASURE) {
+  const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
   const smp = new SpeedMeasurePlugin()
   webpackConfig = smp.wrap(commonConfig)
 }
