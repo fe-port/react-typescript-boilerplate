@@ -4,24 +4,12 @@ import webpackHotMiddleware from 'webpack-hot-middleware'
 import devConfig from '../webpack/webpack.dev'
 import { HMR_PATH } from '../../config/constants'
 
-export default function webpackMiddleware(compiler: webpack.Compiler) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function webpackMiddleware(compiler: any) {
   const publicPath = devConfig.output?.publicPath || '/'
 
   const devMiddlewareOptions: webpackDevMiddleware.Options = {
-    // 只在发生错误或有新的编译时输出
-    stats: {
-      colors: true,
-      builtAt: true,
-      modules: false,
-      children: false,
-      chunks: false,
-      chunkModules: false,
-      entrypoints: false,
-      warnings: false,
-      timings: true
-    }
-    // 需要输出文件到磁盘可以开启
-    // writeToDisk: true
+    writeToDisk: true
   }
 
   if (typeof publicPath === 'string') {

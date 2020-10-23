@@ -11,7 +11,7 @@ import webpackMiddleware from './webpackMiddleware'
 export default function setupMiddlewares(
   server: express.Express,
   compiler: webpack.Compiler
-): void {
+) {
   // 设置代理
   proxyMiddleware(server)
 

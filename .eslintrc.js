@@ -43,6 +43,8 @@ module.exports = {
   rules: {
     'max-params': OFF,
     'react/prop-types': OFF,
+    'react/jsx-uses-react': OFF,
+    'react/react-in-jsx-scope': OFF,
     'react/no-unescaped-entities': OFF,
     'react/jsx-no-comment-textnodes': OFF,
     '@typescript-eslint/no-unused-vars': OFF,

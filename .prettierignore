@@ -4,7 +4,7 @@
 # fixtures
 
 # templates
-**/templates/**
+# **/templates/**
 
 # docs
 **/*.md

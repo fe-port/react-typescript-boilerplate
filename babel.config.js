@@ -19,6 +19,14 @@ module.exports = function (api) {
     ],
     plugins: [
       [
+        'react-intl',
+        {
+          idInterpolationPattern: '[sha512:contenthash:base64:6]',
+          extractFromFormatMessageCall: true,
+          ast: true
+        }
+      ],
+      [
         'import',
         {
           libraryName: 'antd',
@@ -44,11 +52,13 @@ module.exports = function (api) {
     ],
     env: {
       development: {
-        presets: [['@babel/preset-react', { development: true }]],
+        presets: [
+          ['@babel/preset-react', { development: true, runtime: 'automatic' }]
+        ],
         plugins: ['react-hot-loader/babel']
       },
       production: {
-        presets: ['@babel/preset-react'],
+        presets: [['@babel/preset-react', { runtime: 'automatic' }]],
         plugins: [
           'babel-plugin-dev-expression',
           '@babel/plugin-transform-react-constant-elements',

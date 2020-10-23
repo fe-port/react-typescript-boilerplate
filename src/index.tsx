@@ -11,10 +11,10 @@ import ErrorBoundary from './modules/ErrorBoundary'
 import App from './App'
 import './index.less'
 
-// if (process.env.sentry) {
-//   const Sentry = require('@sentry/browser')
-//   Sentry.init({ dsn: process.env.sentry.SENTRY_DNS })
-// }
+if (process.env.sentry) {
+  const Sentry = require('@sentry/browser')
+  Sentry.init({ dsn: process.env.sentry.SENTRY_DNS })
+}
 
 interface Props {}
 
@@ -37,13 +37,14 @@ const Content = (
 )
 
 function bootstrap() {
-  if (false /* process.env.rematch && process.env.antd */) {
+  if (process.env.rematch && process.env.antd) {
     const { getPersistor } = require('@rematch/persist')
-    const { PersistGate } = require('redux-persist/integration/react')
-    const persistor = getPersistor()
+    // const { PersistGate } = require('redux-persist/integration/react')
+    // const persistor = getPersistor()
     ReactDOM.render(
       <Wrapper>
-        <PersistGate persistor={persistor}>{Content}</PersistGate>
+        {/* <PersistGate persistor={persistor}>{Content}</PersistGate> */}
+        {Content}
       </Wrapper>,
       document.querySelector('#root')
     )
@@ -52,6 +53,7 @@ function bootstrap() {
       <Wrapper>{Content}</Wrapper>,
       document.querySelector('#root')
     )
+    ReactDOM.render(<App />, document.querySelector('#root'))
   }
 }
 

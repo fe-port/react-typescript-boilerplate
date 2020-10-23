@@ -2,14 +2,12 @@ import path from 'path'
 
 import webpack from 'webpack'
 import WebpackBar from 'webpackbar'
-import { CleanWebpackPlugin } from 'clean-webpack-plugin'
-import CopyPlugin from 'copy-webpack-plugin'
-import FriendlyErrorsPlugin from 'friendly-errors-webpack-plugin'
-// import { Options as HtmlMinifierOptions } from 'html-minifier'
-import AntdDayjsWebpackPlugin from 'antd-dayjs-webpack-plugin'
+import CopyWebpackPlugin from 'copy-webpack-plugin'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
-import { loader as MiniCssExtractLoader } from 'mini-css-extract-plugin'
-// import { srcAlias } from '../utils'
+import { CleanWebpackPlugin } from 'clean-webpack-plugin'
+import MiniCssExtractPlugin from 'mini-css-extract-plugin'
+// import AntdDayjsWebpackPlugin from 'antd-dayjs-webpack-plugin'
+import FriendlyErrorsPlugin from 'friendly-errors-webpack-plugin'
 import config from '../../config'
 import {
   __DEV__,
@@ -26,13 +24,18 @@ import {
 
 function getCSSLoaders(importLoaders: number) {
   return [
-    __DEV__ ? 'style-loader' : MiniCssExtractLoader,
+    // {
+    //   loader: 'thread-loader'
+    // },
+    {
+      loader: __DEV__ ? 'style-loader' : MiniCssExtractPlugin.loader
+    },
     {
       loader: 'css-loader',
       options: {
         modules: false,
         // 前面使用的每一个 loader 都需要指定 sourceMap 选项
-        sourceMap: true,
+        // sourceMap: true,
         // 指定在 css-loader 前应用的 loader 的数量
         importLoaders
       }
@@ -44,51 +47,64 @@ function getCSSLoaders(importLoaders: number) {
   ]
 }
 
-// index.html 压缩选项
-// const htmlMinifyOptions: HtmlMinifierOptions = {
-//   collapseWhitespace: true,
-//   collapseBooleanAttributes: true,
-//   collapseInlineTagWhitespace: true,
-//   removeComments: true,
-//   removeRedundantAttributes: true,
-//   removeScriptTypeAttributes: true,
-//   removeStyleLinkTypeAttributes: true,
-//   minifyCSS: true,
-//   minifyJS: true,
-//   minifyURLs: true,
-//   useShortDoctype: true
-// }
-
 /**
  * webpack 基础配置
  */
 const commonConfig: webpack.Configuration = {
-  cache: true,
+  cache: {
+    type: 'filesystem'
+  },
   context: PROJECT_ROOT,
-  entry: ['react-hot-loader/patch', path.resolve(ENTRY_PATH, './index.tsx')],
   output: {
+    pathinfo: true,
     publicPath: '/',
     path: OUTPUT_PATH,
-    // filename: 'js/[name]-[hash:8].js',
-    filename: 'js/[name].js',
+    filename: 'asserts/js/[name]-[contenthash:8].js',
     hashSalt: PROJECT_NAME
   },
   resolve: {
-    // 我们导入ts 等模块一般不写后缀名，webpack 会尝试使用这个数组提供的后缀名去导入
-    extensions: ['.js', '.tsx', '.ts', '.json'],
+    // default ['.wasm', '.mjs', '.js', '.json']
+    extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
     alias: {
-      // ...srcAlias,
       // 替换 react-dom 成 @hot-loader/react-dom 以支持 react hooks 的 hot reload
       'react-dom': __DEV__ ? '@hot-loader/react-dom' : 'react-dom',
       '@': ENTRY_PATH
     }
   },
+  externals: {},
   module: {
     rules: [
+      /*
       {
-        test: /\.(tsx?|js)$/,
-        loader: 'babel-loader',
-        options: { cacheDirectory: true },
+        enforce: 'pre',
+        test: /\.(t|j)sx$/,
+        use: [
+          {
+            loader: 'thread-loader'
+          },
+          {
+            loader: 'eslint-loader',
+            options: {
+              cache: true
+            }
+          }
+        ],
+        exclude: /node_modules/
+      },
+      */
+      {
+        test: /\.(j|t)sx?$/,
+        use: [
+          // {
+          //   loader: 'thread-loader'
+          // },
+          {
+            loader: 'babel-loader',
+            options: {
+              cacheDirectory: true
+            }
+          }
+        ],
         exclude: /node_modules/
       },
       {
@@ -113,16 +129,18 @@ const commonConfig: webpack.Configuration = {
           }
         ]
       },
-      // {
-      //   test: /\.scss$/,
-      //   use: [
-      //     ...getCSSLoaders(2),
-      //     {
-      //       loader: 'sass-loader',
-      //       options: { sourceMap: true }
-      //     }
-      //   ]
-      // },
+      /*
+      {
+        test: /\.s[ac]ss$/,
+        use: [
+          ...getCSSLoaders(2),
+          {
+            loader: 'sass-loader', // fast-sass-loader
+            options: { sourceMap: true }
+          }
+        ]
+      },
+      */
       {
         test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
         use: [
@@ -132,34 +150,61 @@ const commonConfig: webpack.Configuration = {
               // 低于 10k 转换成 base64
               limit: 10 * 1024,
               // 在文件名中插入文件内容 hash，解决强缓存立即更新的问题
-              name: '[name].[contenthash:8].[ext]',
-              outputPath: 'images'
+              outputPath: 'asserts',
+              name: '[path][name]-[hash:8].[ext]'
             }
           }
         ]
       },
       {
-        test: /\.(ttf|woff|woff2|eot|otf)$/,
+        test: /\.(svg)(\?.*)?$/,
         use: [
           {
-            loader: 'url-loader',
+            loader: 'file-loader',
             options: {
-              name: '[name]-[contenthash:8].[ext]',
-              outputPath: 'fonts'
+              name: 'asserts/images/[path][name].[ext]'
+            }
+          }
+        ]
+      },
+      {
+        test: /\.(eot|woff|otf|ttf|woff2|appcache|mp3|mp4|pdf)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              outputPath: 'asserts',
+              name: '[path][name]-[hash:8].[ext]'
             }
           }
         ]
       }
+      /*
+      {
+        test: /\.wasm$/,
+        include: ENTRY_PATH,
+        type: 'webassembly/experimental'
+      },
+      {
+        test: /\.xml$/,
+        include: ENTRY_PATH,
+        use: ['xml-loader']
+      }
+      */
     ]
   },
   plugins: [
-    // [替换失败]用 dayjs 替换 moment
-    new AntdDayjsWebpackPlugin(),
+    // @ts-ignore
     new WebpackBar({
       name: 'React-TypeScript-Boilerplate',
       // react 蓝
       color: '#00FF00'
     }),
+    // @ts-ignore
+    new CleanWebpackPlugin(),
+    // [替换失败]用 dayjs 替换 moment
+    // new AntdDayjsWebpackPlugin(),
+    // @ts-ignore
     new FriendlyErrorsPlugin(),
     new webpack.IgnorePlugin({
       resourceRegExp: /^\.\/locale$/,
@@ -172,13 +217,13 @@ const commonConfig: webpack.Configuration = {
       'process.env.rematch': JSON.stringify(config.rematch),
       'process.env.Reatoron': JSON.stringify(config.Reactotron)
     }),
-    // new webpack.NamedModulesPlugin(),
-    // new webpack.NoEmitOnErrorsPlugin(),
+    new webpack.NoEmitOnErrorsPlugin(),
+    // @ts-ignore
     ...(__DEV__ ? [] : [new CleanWebpackPlugin()]),
+    // @ts-ignore
     new HtmlWebpackPlugin({
-      // HtmlWebpackPlugin 会调用 HtmlMinifier 对 HTMl 文件进行压缩
       // 只在生产环境压缩
-      // minify: __DEV__ ? false : htmlMinifyOptions,
+      minify: 'auto',
       template: path.resolve(PUBLIC_PATH, './index.html'),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       templateParameters: (...args: any[]) => {
@@ -202,7 +247,8 @@ const commonConfig: webpack.Configuration = {
       }
     }),
     // 将 public 文件夹中除 index.html 以外的文件拷贝到构建输出文件夹中
-    new CopyPlugin({
+    // @ts-ignore
+    new CopyWebpackPlugin({
       patterns: [
         {
           context: PUBLIC_PATH,
@@ -210,18 +256,59 @@ const commonConfig: webpack.Configuration = {
           to: OUTPUT_PATH,
           toType: 'dir',
           globOptions: {
-            ignore: ['**/index.html']
+            ignore: ['**/index.html', '*.DS_Store']
           }
         }
       ]
     })
-  ]
+  ],
+  stats: {
+    // 是否输出不同的颜色
+    colors: true,
+    // 是否展示每个模块与入口文件的距离
+    depth: true,
+    // 是否展示入口文件与对应的文件 bundles
+    entrypoints: true,
+    // 是否展示 --env 信息
+    env: true,
+    // 是否隐藏孤儿模块
+    orphanModules: true,
+    // 输出日志级别
+    logging: 'info', // 'none' | 'error' | 'warn' | 'info' | 'log' | 'verbose'
+    // 添加模块的源码
+    source: true,
+    warningsFilter: warning =>
+      /Conflicting order|asset size limit|entrypoint size limit|/gm.test(
+        warning
+      )
+  },
+  optimization: {
+    minimize: false,
+    runtimeChunk: 'single',
+    splitChunks: {
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          minSize: 50000,
+          minChunks: 1,
+          chunks: 'initial',
+          priority: 1
+        }
+      }
+    }
+  },
+  performance: {
+    hints: false,
+    maxEntrypointSize: 614400,
+    maxAssetSize: 614400
+  }
 }
 
-if (__DEV__) {
+if (__DEV__ && Array.isArray(commonConfig.entry)) {
   // 开发环境下注入热更新补丁
   // reload=true 设置 webpack 无法热更新时刷新整个页面，overlay=true 设置编译出错时在网页中显示出错信息遮罩
-  ;(commonConfig.entry as string[]).unshift(
+  commonConfig.entry.unshift(
     `webpack-hot-middleware/client?path=${HMR_PATH}&reload=true&overlay=true`
   )
 }
@@ -231,11 +318,13 @@ let webpackConfig = commonConfig
 if (ENABLE_ANALYZE) {
   const SizePlugin = require('size-plugin')
   const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
-  webpackConfig?.plugins.push(
+  webpackConfig.plugins = webpackConfig.plugins || []
+  webpackConfig.plugins.push(
     new SizePlugin({ writeFile: false }),
     new BundleAnalyzerPlugin()
   )
 }
+// 构建速度分析
 if (ENABLE_SPEED_MEASURE) {
   const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
   const smp = new SpeedMeasurePlugin()

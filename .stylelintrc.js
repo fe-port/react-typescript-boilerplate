@@ -34,7 +34,6 @@ module.exports = {
     '.prettierrc.js',
     '.stylelintrc.js',
     'babel.config.js',
-    '*.md',
     '**/*.js',
     '**/*.jsx',
     '**/*.tsx',

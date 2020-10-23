@@ -1,5 +1,4 @@
 import React from 'react'
-// import { hot } from 'react-hot-loader'
 import { withRouter } from 'react-router-dom'
 import Routers from './routes'
 
@@ -13,4 +12,4 @@ if (process.env.NODE_ENV === 'development') {
   RouteApp = hot(RouteApp)
 }
 
-export default RouteApp
+export default App

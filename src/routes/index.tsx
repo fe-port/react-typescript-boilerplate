@@ -9,7 +9,7 @@ const Router: React.FC<Props> = () => {
     <BrowserRouter>
       <Switch>
         <Route path="/">
-          <UserLayout />
+          <UserLayout>登录注册</UserLayout>
         </Route>
       </Switch>
     </BrowserRouter>

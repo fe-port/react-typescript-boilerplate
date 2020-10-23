@@ -2,40 +2,42 @@ import path from 'path'
 
 import webpack from 'webpack'
 import { merge } from 'webpack-merge'
-import CompressionPlugin from 'compression-webpack-plugin'
-import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
-import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import TerserPlugin from 'terser-webpack-plugin'
+import CompressionPlugin from 'compression-webpack-plugin'
+import MiniCssExtractPlugin from 'mini-css-extract-plugin'
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
 import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin'
 import commonConfig from './webpack.common'
-import { COPYRIGHT, PROJECT_ROOT } from '../../config/constants'
+import { ENTRY_PATH, COPYRIGHT, PROJECT_ROOT } from '../../config/constants'
 
 /**
  * webpack 生产环境配置
  */
 const webpackConfig = merge(commonConfig, {
   mode: 'production',
+  entry: [path.resolve(ENTRY_PATH, './index.tsx')],
   devtool: 'cheap-module-source-map',
   plugins: [
     new webpack.BannerPlugin({
       raw: true,
       banner: COPYRIGHT
     }),
-    // new webpack.HashedModuleIdsPlugin(),
     new ForkTsCheckerWebpackPlugin({
       typescript: {
         // 生产环境打包并不频繁，可以适当调高允许使用的内存，加快类型检查速度
         memoryLimit: 1024 * 2,
         configFile: path.resolve(PROJECT_ROOT, './tsconfig.json')
       }
-    })
-    // new MiniCssExtractPlugin({
-    //   filename: 'css/[name].[contenthash:8].css',
-    //   // chunkFilename: 'css/[name].[contenthash:8].css',
-    //   chunkFilename: 'css/[name].css',
-    //   ignoreOrder: true
-    // }),
-    // new CompressionPlugin({ cache: true })
+    }),
+    // @ts-ignore
+    new MiniCssExtractPlugin({
+      filename: 'css/[name].[contenthash:8].css',
+      // chunkFilename: 'css/[name].[contenthash:8].css',
+      chunkFilename: 'css/[name].css',
+      ignoreOrder: true
+    }),
+    // @ts-ignore
+    new CompressionPlugin({ cache: true })
   ],
   optimization: {
     // runtimeChunk: 'single',
@@ -81,8 +83,10 @@ const webpackConfig = merge(commonConfig, {
     },
     minimize: true,
     minimizer: [
-      // new TerserPlugin({ extractComments: false })
-      // new OptimizeCSSAssetsPlugin()
+      // @ts-ignore
+      new TerserPlugin(),
+      // @ts-ignore
+      new OptimizeCSSAssetsPlugin()
     ]
   }
 })

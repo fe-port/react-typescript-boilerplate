@@ -4,13 +4,14 @@ import webpack from 'webpack'
 import { merge } from 'webpack-merge'
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
 import commonConfig from './webpack.common'
-import { PROJECT_ROOT } from '../../config/constants'
+import { ENTRY_PATH, PROJECT_ROOT } from '../../config/constants'
 
 /**
  * webpack 开发环境配置
  */
 const webpackConfig = merge(commonConfig, {
   mode: 'development',
+  entry: ['react-hot-loader/patch', path.resolve(ENTRY_PATH, './index.tsx')],
   // 如果觉得还可以容忍更慢的非 eval 类型的 sourceMap，可以搭配 error-overlay-webpack-plugin 使用
   // 需要显示列号可以切换成 eval-source-map
   devtool: 'eval-cheap-module-source-map',
@@ -26,31 +27,31 @@ const webpackConfig = merge(commonConfig, {
       }
     }),
     new webpack.HotModuleReplacementPlugin()
-  ],
-  optimization: {
-    splitChunks: {
-      chunks: 'async',
-      minSize: 30000,
-      minChunks: 1,
-      maxAsyncRequests: 5,
-      maxInitialRequests: 3,
-      automaticNameDelimiter: '~',
-      // name: true,
-      cacheGroups: {
-        vendors: false,
-        // TODO 待优化
-        common: {
-          name: 'chunk-common',
-          minChunks: 2,
-          chunks: 'async',
-          reuseExistingChunk: true
-        }
-      }
-    }
-  },
-  performance: {
-    hints: 'error'
-  }
+  ]
+  // optimization: {
+  //   splitChunks: {
+  //     chunks: 'async',
+  //     minSize: 30000,
+  //     minChunks: 1,
+  //     maxAsyncRequests: 5,
+  //     maxInitialRequests: 3,
+  //     automaticNameDelimiter: '~',
+  //     // name: true,
+  //     cacheGroups: {
+  //       vendors: false,
+  //       // TODO 待优化
+  //       common: {
+  //         name: 'chunk-common',
+  //         minChunks: 2,
+  //         chunks: 'async',
+  //         reuseExistingChunk: true
+  //       }
+  //     }
+  //   }
+  // },
+  // performance: {
+  //   hints: 'error'
+  // }
 })
 
 export default webpackConfig
